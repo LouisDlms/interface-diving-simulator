@@ -52,3 +52,14 @@ a:hover {
 .h-vh {
     height: 100vh !important;
 }
+
+.dropdown-toggle {
+    border-radius: 10px;
+    background-color: cornflowerblue;
+    color: white !important;
+    
+}
+
+.bg-styled {
+    background: linear-gradient(#f2fcfe, #1c92d2);
+}

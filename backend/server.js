@@ -3,12 +3,30 @@ const http = require("http");
 const socketIo = require("socket.io");
 const SerialPort = require("serialport");
 const Readline = require('@serialport/parser-readline');
+const fs = require('fs');
+const doctorsPath = './config/doctors.json';
+const patientsPath = './config/patients.json';
 
 process.env.TZ = 'Europe/Paris'
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
 
 const app = express();
+// Add headers
+app.use(function (req, res, next) {
+
+    // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+    // Pass to next layer of middleware
+    next();
+});
 app.use(index);
 const server = http.createServer(app);
 const io = socketIo(server); // < Interesting!
@@ -39,6 +57,14 @@ io.on("connection", (socket) => {
                 if (interval) {
                     clearInterval(interval);
                 }
+                users = {}
+                fs.readFile(doctorsPath, 'utf8', (err, data) => {
+                    users.doctors = JSON.parse(data)
+                    fs.readFile(patientsPath, 'utf8', (err, data) => {
+                        users.patients = JSON.parse(data)
+                        socket.emit("get-users", users)
+                    })
+                })
                 interval = setInterval(() => getApiAndEmit(socket), 1000);
                 break
             case "app":
@@ -71,6 +97,40 @@ io.on("connection", (socket) => {
     socket.on("app-stop", () => {
         console.log("Dashboard > App : Stop")
         io.emit("app-stop")
+    })
+    socket.on("dashboard-new-doctor", (data) => {
+        console.log("Dashboard : New Doctor")
+        fs.readFile(doctorsPath, 'utf8', function readFileCallback(err, doctors) {
+            if (err) {
+                console.log(err);
+            } else {
+                doctors = JSON.parse(doctors)
+                data.id = doctors[doctors.length - 1].id + 1
+                doctors.push(data)
+                fs.writeFile(doctorsPath, JSON.stringify(doctors, null, 2), 'utf8', err => {
+                    if (err) throw err;
+                    console.log('File has been saved!');
+                });
+            }
+        });
+
+        
+    })
+    socket.on("dashboard-new-patient", (data) => {
+        console.log("Dashboard : New Patient")
+        fs.readFile(patientsPath, 'utf8', function readFileCallback(err, patients) {
+            if (err) {
+                console.log(err);
+            } else {
+                patients = JSON.parse(patients)
+                data.id = patients[patients.length - 1].id + 1
+                patients.push(data)
+                fs.writeFile(patientsPath, JSON.stringify(patients, null, 2), 'utf8', err => {
+                    if (err) throw err;
+                    console.log('File has been saved!');
+                });
+            }
+        });
     })
 
     socket.on("disconnect", () => {

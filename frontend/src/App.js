@@ -5,6 +5,7 @@ import Fader from "react-fader";
 import Switch from "react-router-transition-switch";
 import Dashboard from "./Dashboard"
 import Home from "./Home.js";
+import NewEntry from "./NewEntry";
 import { Col } from "react-bootstrap";
 import store from "./store"
 
@@ -19,22 +20,25 @@ class App extends React.Component {
 
   render() {
     return (
-      <Col className="App h-100 align-center">
+      <Col className="App h-100 align-center bg-styled">
         <Router>
           <Switch component={ Fader }>
               <Route path="/dashboard">
                 <Dashboard
                   store={ store }
-                  socket={ this.socket }
                 />
               </Route>
               <Route path="/export">
                 {/* <Export/> */}
               </Route>
+              <Route path="/new-entry">
+                <NewEntry
+                  store={ store }
+                />
+              </Route>
               <Route>
                 <Home
                   store={ store }
-                  socket={ this.socket }
                 />
               </Route>
           </Switch>

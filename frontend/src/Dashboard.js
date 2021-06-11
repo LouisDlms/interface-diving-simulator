@@ -1,10 +1,9 @@
 import React, { useEffect } from "react";
 import { Container, Row, Col, Card, ListGroup, Button, Form } from "react-bootstrap"
 import { VscCircleFilled } from "react-icons/vsc"
-import { ImUser } from "react-icons/im"
 import { FaPlay, FaPause, FaStop } from "react-icons/fa"
-import { GiDoubleFish, GiFishingBoat, GiTurtle } from "react-icons/gi"
-import { BsMicFill } from "react-icons/bs"
+import { GiDoubleFish, GiFishingBoat, GiTurtle, GiDoctorFace } from "react-icons/gi"
+import { BsMicFill, BsPersonLinesFill } from "react-icons/bs"
 import { RiHeadphoneFill } from "react-icons/ri"
 import {
     XYPlot,
@@ -102,7 +101,7 @@ class Dashboard extends React.Component {
     render() {
         console.log( this.state.sensors.bpm )
         return (
-            <Container fluid className="h-vh">
+            <Container fluid className="h-vh bg-white">
                 <Helmet>
                     <title>Tableau de bord - Plongée Virtuelle</title>
                 </Helmet>
@@ -239,9 +238,19 @@ class Dashboard extends React.Component {
                         <FaPause className="control-button" onClick={ this.appPause } />
                         <FaStop className="control-button" onClick={ this.appStop } />
                     </Col>
-                    <Col className="d-flex justify-content-end align-items-center text-light">
-                        <ImUser className="user-icon"/>
-                        <span className="align-middle ml-1 fs-5">{ this.state.user.fullName }</span>
+                    <Col className="d-flex flex-column align-items-end justify-content-center text-light">
+                        <div>
+                            <GiDoctorFace className="user-icon"/>&nbsp;
+                            <span className="align-middle ml-1 fs-5">
+                                { this.state.doctor.firstName + " " + this.state.doctor.lastName.toUpperCase() }
+                            </span>
+                        </div>
+                        <div>
+                            <BsPersonLinesFill className="user-icon"/>&nbsp;
+                            <span className="align-middle ml-1 fs-5">
+                                { this.state.patient.firstName + " " + this.state.patient.lastName.toUpperCase() }
+                            </span>
+                        </div>    
                     </Col>
                 </Row>
             </Container>

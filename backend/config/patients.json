@@ -1,0 +1,29 @@
+[
+  {
+    "id": 0,
+    "firstName": "François",
+    "lastName": "Mazé",
+    "birthDay": "2000-01-01",
+    "sex": "M",
+    "weight": 120,
+    "height": 178
+  },
+  {
+    "firstName": "Anatole",
+    "lastName": "Hernot",
+    "birthDay": "2000-01-20",
+    "sex": "M",
+    "weight": 20,
+    "height": 150,
+    "id": 1
+  },
+  {
+    "firstName": "Hugues",
+    "lastName": "Loupe",
+    "birthDay": "1976-12-15",
+    "sex": "M",
+    "weight": 78,
+    "height": 189,
+    "id": 2
+  }
+]

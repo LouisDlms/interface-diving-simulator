@@ -42,9 +42,11 @@ const UserMenu = React.forwardRef(
                 !value || child.props.children.toLowerCase().includes(value),
             )}
           </ul>
-          <Button variant="primary" className="mx-3 mb-2 w-75 text-left align-middle">
-            <AiOutlinePlusCircle className="control-button"/>&nbsp;Nouvelle fiche
-          </Button>
+          <Link to="/new-entry">
+            <Button variant="primary" className="mx-3 mb-2 min-w-75 text-left align-middle">
+              <AiOutlinePlusCircle className="control-button"/>&nbsp;Nouvelle entrée
+            </Button>
+          </Link>
         </div>
       );
     },
@@ -56,13 +58,24 @@ class Home extends React.Component {
     
     this.store = props.store
     this.state = this.store.getState()
+    this.users = {
+      doctors: [],
+      patients: []
+    }
     this.unsubscribe = () => {}
   }
+
 
   componentDidMount() {
     this.unsubscribe = this.store.subscribe(() => {
       this.setState(this.store.getState())
     })
+
+    fetch("http://localhost:4001/users").then((response) => {
+        return response.json()
+      }).then((myJson) => {
+        this.users = myJson
+      });
   }
 
   componentWillUnmount() {
@@ -86,16 +99,16 @@ class Home extends React.Component {
         <Card className="center-box">
           <Card.Header as="h5">Plongée Virtuelle</Card.Header>
           <Card.Body>
-              <Card.Title className="d-flex flex-row">Bienvenue&nbsp;
+              <Card.Title className="d-flex flex-row">Bienvenue, Docteur&nbsp;
                   <Dropdown>
                       <Dropdown.Toggle as={UserToggle} className="dropdown-toggle" id="dropdown-doctor">
-                      Louis DELMAS&nbsp;
+                      { this.users.doctors.length ? this.users.doctors[0].firstName + " " + this.users.doctors[0].lastName.toUpperCase() : "[Chargement...]" }&nbsp;
                       </Dropdown.Toggle>
 
                       <Dropdown.Menu as={UserMenu}>
-                          <Dropdown.Item>Anatole HERNOT</Dropdown.Item>
-                          <Dropdown.Item>Marguerite DE JEAN DE LABATIE</Dropdown.Item>
-                          <Dropdown.Item>François MAZE</Dropdown.Item>
+                          { this.users.doctors.map(data => (
+                            <Dropdown.Item>{ data.firstName + " " + data.lastName.toUpperCase() }</Dropdown.Item>
+                          ))}
                       </Dropdown.Menu>
                   </Dropdown>
               </Card.Title>
@@ -104,13 +117,13 @@ class Home extends React.Component {
                 Veuillez sélectionner un patient :&nbsp;
                 <Dropdown>
                       <Dropdown.Toggle as={UserToggle} className="dropdown-toggle" id="dropdown-patient">
-                      Anatole HERNOT&nbsp;
+                      { this.users.patients.length ? this.users.patients[0].firstName + " " + this.users.patients[0].lastName.toUpperCase() : "[Chargement...]" }&nbsp;
                       </Dropdown.Toggle>
                       
                       <Dropdown.Menu as={UserMenu}>
-                          <Dropdown.Item>Louis DELMAS</Dropdown.Item>
-                          <Dropdown.Item>Marguerite DE JEAN DE LABATIE</Dropdown.Item>
-                          <Dropdown.Item>François MAZE</Dropdown.Item>
+                          { this.users.patients.map(data => (
+                            <Dropdown.Item>{ data.firstName + " " + data.lastName.toUpperCase() }</Dropdown.Item>
+                          ))}
                       </Dropdown.Menu>
                   </Dropdown>
               </Card.Text>

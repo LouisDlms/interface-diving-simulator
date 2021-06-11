@@ -8,9 +8,19 @@ const initialState = {
         server: 0,
         bpm: 0
     },
-    user: {
-        id: 1,
-        fullName: "Louis DELMAS"
+    doctor: {
+        id: 0,
+        firstName: "",
+        lastName: ""
+    },
+    patient: {
+        id: 0,
+        firstName: "",
+        lastName: "",
+        birthDay: "",
+        sex: "",
+        weight: 0,
+        height: 0
     },
     socket: io(ENDPOINT, {
         transports: ['websocket'],
@@ -116,12 +126,28 @@ export default function appReducer(state = initialState, action) {
             }
         }
 
-        case 'user/changeUser': {
+        case 'doctor/set': {
             return {
                 ...state,
-                user: {
+                doctor: {
                     id: action.payload.id,
-                    fullName: action.payload.fullName
+                    firstName: action.payload.firstName,
+                    lastName: action.payload.lastName
+                }
+            }
+        }
+
+        case 'patient/set': {
+            return {
+                ...state,
+                patient: {
+                    id: action.payload.id,
+                    firstName: action.payload.firstName,
+                    lastName: action.payload.lastName,
+                    birthDay: action.payload.birthDay,
+                    sex: action.payload.sex,
+                    weight: action.payload.weight,
+                    height: action.payload.height
                 }
             }
         }
