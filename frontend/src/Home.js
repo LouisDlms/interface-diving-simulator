@@ -21,7 +21,7 @@ const UserToggle = React.forwardRef(({ children, onClick }, ref) => (
 const UserMenu = React.forwardRef(
     ({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
       const [value, setValue] = useState('');
-  
+      
       return (
         <div
           ref={ref}
@@ -39,7 +39,7 @@ const UserMenu = React.forwardRef(
           <ul className="list-unstyled">
             {React.Children.toArray(children).filter(
               (child) =>
-                !value || child.props.children.toLowerCase().includes(value),
+                !value || child.props.children.toLowerCase().includes(value)
             )}
           </ul>
           <Link to="/new-entry">
@@ -75,6 +75,8 @@ class Home extends React.Component {
         return response.json()
       }).then((myJson) => {
         this.users = myJson
+        this.store.dispatch({ type: "doctor/set", payload: this.users.doctors[0] })
+        this.store.dispatch({ type: "patient/set", payload: this.users.patients[0] })
       });
   }
 
@@ -93,6 +95,14 @@ class Home extends React.Component {
     }
   }
 
+  changeDoctor = (id) => {
+    this.store.dispatch({ type: "doctor/set", payload: this.users.doctors.filter(doctor => (doctor.id === id))[0] })
+  }
+
+  changePatient = (id) => {
+    this.store.dispatch({ type: "patient/set", payload: this.users.patients.filter(patient => (patient.id === id))[0] })
+  }
+
   render() {
     return (
       <div className="h-vh">
@@ -102,12 +112,12 @@ class Home extends React.Component {
               <Card.Title className="d-flex flex-row">Bienvenue, Docteur&nbsp;
                   <Dropdown>
                       <Dropdown.Toggle as={UserToggle} className="dropdown-toggle" id="dropdown-doctor">
-                      { this.users.doctors.length ? this.users.doctors[0].firstName + " " + this.users.doctors[0].lastName.toUpperCase() : "[Chargement...]" }&nbsp;
+                      { this.users.doctors.length ? this.state.doctor.firstName + " " + this.state.doctor.lastName.toUpperCase() : "[Chargement...]" }&nbsp;
                       </Dropdown.Toggle>
 
                       <Dropdown.Menu as={UserMenu}>
                           { this.users.doctors.map(data => (
-                            <Dropdown.Item>{ data.firstName + " " + data.lastName.toUpperCase() }</Dropdown.Item>
+                            <Dropdown.Item onClick={ e => this.changeDoctor(data.id) }>{ data.firstName + " " + data.lastName.toUpperCase() }</Dropdown.Item>
                           ))}
                       </Dropdown.Menu>
                   </Dropdown>
@@ -117,12 +127,12 @@ class Home extends React.Component {
                 Veuillez sélectionner un patient :&nbsp;
                 <Dropdown>
                       <Dropdown.Toggle as={UserToggle} className="dropdown-toggle" id="dropdown-patient">
-                      { this.users.patients.length ? this.users.patients[0].firstName + " " + this.users.patients[0].lastName.toUpperCase() : "[Chargement...]" }&nbsp;
+                      { this.users.patients.length ? this.state.patient.firstName + " " + this.state.patient.lastName.toUpperCase() : "[Chargement...]" }&nbsp;
                       </Dropdown.Toggle>
                       
                       <Dropdown.Menu as={UserMenu}>
                           { this.users.patients.map(data => (
-                            <Dropdown.Item>{ data.firstName + " " + data.lastName.toUpperCase() }</Dropdown.Item>
+                            <Dropdown.Item onClick={ e => this.changePatient(data.id) }>{ data.firstName + " " + data.lastName.toUpperCase() }</Dropdown.Item>
                           ))}
                       </Dropdown.Menu>
                   </Dropdown>
