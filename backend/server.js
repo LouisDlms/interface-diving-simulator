@@ -1,13 +1,15 @@
+process.env.TZ = 'Europe/Paris'
+
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const SerialPort = require("serialport");
 const Readline = require('@serialport/parser-readline');
 const fs = require('fs');
+const configPath = './config/config.json';
 const doctorsPath = './config/doctors.json';
 const patientsPath = './config/patients.json';
 
-process.env.TZ = 'Europe/Paris'
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
 
@@ -39,11 +41,32 @@ let status = {
     breathSensor: 0
 }
 let simulationStart = 0;
-let bpm = 0;
-
 const lengthData = 50;
+let dirPath;
+let config;
+let users = {
+    doctor: {
+        id: 0,
+        firstName: "",
+        lastName: ""
+    },
+    patient: {
+        id: 0,
+        firstName: "",
+        lastName: "",
+        birthDay: "",
+        sex: "",
+        weight: 0,
+        height: 0
+    }
+};
 
 let lastBpmData = []
+let lastBreathData = []
+
+fs.readFile(configPath, 'utf8', (err, data) => {
+    config = JSON.parse(data)
+})
 
 io.on("connection", (socket) => {
     console.log("Someone connected, waiting for identification")
@@ -57,14 +80,7 @@ io.on("connection", (socket) => {
                 if (interval) {
                     clearInterval(interval);
                 }
-                users = {}
-                fs.readFile(doctorsPath, 'utf8', (err, data) => {
-                    users.doctors = JSON.parse(data)
-                    fs.readFile(patientsPath, 'utf8', (err, data) => {
-                        users.patients = JSON.parse(data)
-                        socket.emit("get-users", users)
-                    })
-                })
+
                 interval = setInterval(() => getApiAndEmit(socket), 1000);
                 break
             case "app":
@@ -77,12 +93,23 @@ io.on("connection", (socket) => {
         }
                 
         if(status.app !== 0 && status.dashboard !== 0) {
-            console.log("Sync done!")
+            console.log("Sync done! Start Simulation.")
             if(simulationStart === 0) {
                 simulationStart = new Date()
+            
+                const month = simulationStart.getUTCMonth() + 1
+                dirPath = "./data/" + config.currentIdData + "_" + simulationStart.getFullYear() + "-" + month + "-" + simulationStart.getUTCDate() + "_" + users.doctor.id + "-" + users.patient.id
+                config.currentIdData += 1
+                fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8', err => {
+                    if (err) throw err;
+                    console.log('File has been saved!');
+                });
+                fs.mkdirSync(dirPath, { recursive: true })
+                console.log(dirPath)
             }
             io.emit("sync", simulationStart)
-
+            
+            
         }
     })
 
@@ -97,6 +124,10 @@ io.on("connection", (socket) => {
     socket.on("app-stop", () => {
         console.log("Dashboard > App : Stop")
         io.emit("app-stop")
+        if(simulationStart !== 0) {
+            console.log("App Stopped. Start Export Procedure.")
+            // Export
+        }
     })
     socket.on("dashboard-new-doctor", (data) => {
         console.log("Dashboard : New Doctor")
@@ -132,6 +163,10 @@ io.on("connection", (socket) => {
             }
         });
     })
+    socket.on("dashboard-update-users", (data) => {
+        console.log("Dashboard : Update Current Users")
+        users = data
+    })
 
     socket.on("disconnect", () => {
         // Search for the origin: can emit ping and see the response - if someone doesnt answer, that's the one who has disconnected
@@ -155,15 +190,15 @@ const getApiAndEmit = socket => {
 };
 
 // BPM Sensor
-let sp = new SerialPort("COM4", {
+let spBpm = new SerialPort("COM4", {
     baudRate: 9600
 });
-const parser = sp.pipe(new Readline({ delimiter: '\r\n' }));
+const parseBpm = spBpm.pipe(new Readline({ delimiter: '\r\n' }));
 
-sp.on("open", function() {
+spBpm.on("open", function() {
     console.log('COM4 opened (first USB port on the front of the computer)');
     status.bpmSensor = 1;
-    parser.on('data', function(data) {
+    parserBpm.on('data', function(data) {
         console.log('Data received from COM4: ' + data);
         if(simulationStart !== 0) {
             const serverClock = (new Date()) - simulationStart;
@@ -177,5 +212,30 @@ sp.on("open", function() {
         }
     });
 });
+
+// Breath Sensor
+let spBreath = new SerialPort("COM4", {
+    baudRate: 9600
+});
+const parserBreath = spBreath.pipe(new Readline({ delimiter: '\r\n' }));
+
+spBreath.on("open", function() {
+    console.log('COM4 opened (first USB port on the front of the computer)');
+    status.breathSensor = 1;
+    parserBreath.on('data', function(data) {
+        console.log('Data received from COM4: ' + data);
+        if(simulationStart !== 0) {
+            const serverClock = (new Date()) - simulationStart;
+            if(lastBreathData.length >= lengthData) {
+                lastBreathData.shift();
+            }
+            lastBreathData.push({
+                x: serverClock,
+                y: parseInt(data, 10)
+            });
+        }
+    });
+});
+
 
 server.listen(port, () => console.log(`Listening on port ${port}`));

@@ -97,13 +97,23 @@ class Home extends React.Component {
 
   changeDoctor = (id) => {
     this.store.dispatch({ type: "doctor/set", payload: this.users.doctors.filter(doctor => (doctor.id === id))[0] })
+    setTimeout(() => this.state.socket.emit("dashboard-update-users",
+    {
+      doctor: this.state.doctor,
+      patient: this.state.patient
+    }), 500)
   }
 
   changePatient = (id) => {
     this.store.dispatch({ type: "patient/set", payload: this.users.patients.filter(patient => (patient.id === id))[0] })
+    setTimeout(() => this.state.socket.emit("dashboard-update-users",
+    {
+      doctor: this.state.doctor,
+      patient: this.state.patient
+    }), 500)
   }
 
-  render() {
+  render() {  
     return (
       <div className="h-vh">
         <Card className="center-box">
