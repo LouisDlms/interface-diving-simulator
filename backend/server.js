@@ -6,6 +6,8 @@ const socketIo = require("socket.io");
 const SerialPort = require("serialport");
 const Readline = require('@serialport/parser-readline');
 const fs = require('fs');
+const exec = require('child_process').exec;
+
 const configPath = './config/config.json';
 const doctorsPath = './config/doctors.json';
 const patientsPath = './config/patients.json';
@@ -156,6 +158,21 @@ io.on("connection", (socket) => {
                 if (err) throw err;
                 console.log('File has been saved!');
             });
+
+            let isCaptureDone = false;
+            while (!isCaptureDone) {
+                isCaptureDone = !!+fs.readdirSync("./captures").length
+            }
+            
+            fs.readdir("./captures", (err, files) => {
+                files.forEach(file => {
+                        fs.rename("./captures/" + file, dirPath + "/" + file, err => {
+                            if (err) throw err;
+                            console.log('Moving ' + file);  
+                        });
+                   }
+                )
+            })
         }
     })
     socket.on("dashboard-new-doctor", (data) => {

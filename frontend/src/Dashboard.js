@@ -17,6 +17,7 @@ import {
     ChartLabel
   } from "react-vis";
 import { Helmet } from "react-helmet";
+import { Link } from "react-router-dom"
 
 const FlexibleXYPlot = makeHeightFlexible(makeWidthFlexible(XYPlot)); 
 
@@ -134,7 +135,7 @@ class Dashboard extends React.Component {
                             />
                             <LineSeries
                                 curve={'curveMonotoneX'}
-                                data={ this.state.sensors.bpm }
+                                data={ this.state.sensors.bpm.length ? this.state.sensors.bpm : [{x:0, y:0}]}
                             />
                             { /* Status */ }
                             <VscCircleFilled color={ this.getSensorStatus("bpm") } className="led-chart"/>
@@ -196,7 +197,7 @@ class Dashboard extends React.Component {
                             />
                             <LineSeries
                                 curve={'curveMonotoneX'}
-                                data={[{x: 1, y: 11}, {x: 1.5, y: 29}, {x: 3, y: 7}, {x: 4, y: 3}]}
+                                data={ this.state.sensors.breath.length ? this.state.sensors.breath : [{x:0, y:0}]}
                             />
                             { /* Status */ }
                             <VscCircleFilled color="red" className="led-chart"/>
@@ -236,7 +237,9 @@ class Dashboard extends React.Component {
                     <Col className="d-flex align-items-center justify-content-center text-light">
                         <FaPlay className="control-button" onClick={ this.appPlay } />
                         <FaPause className="control-button" onClick={ this.appPause } />
-                        <FaStop className="control-button" onClick={ this.appStop } />
+                        <Link to="/medical-report">
+                            <FaStop className="control-button" onClick={ this.appStop } />
+                        </Link>
                     </Col>
                     <Col className="d-flex flex-column align-items-end justify-content-center text-light">
                         <div>
