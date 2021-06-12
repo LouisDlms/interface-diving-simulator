@@ -41,7 +41,6 @@ let status = {
     breathSensor: 0
 }
 let simulationStart = 0;
-const lengthData = 50;
 let dirPath;
 let config;
 let users = {
@@ -61,8 +60,13 @@ let users = {
     }
 };
 
+const lengthData = 50;
+let counterBpm = 0
+let counterBreath = 0
 let lastBpmData = []
 let lastBreathData = []
+
+let events = [] // event = JSON w/ type and time
 
 fs.readFile(configPath, 'utf8', (err, data) => {
     config = JSON.parse(data)
@@ -115,18 +119,43 @@ io.on("connection", (socket) => {
 
     socket.on("app-play", () => {
         console.log("Dashboard > App : Play")
+        events.push({
+            type: "play",
+            date: new Date()
+        })
         io.emit("app-play")
     })
+
     socket.on("app-pause", () => {
         console.log("Dashboard > App : Pause")
+        events.push({
+            type: "pause",
+            date: new Date()
+        })
         io.emit("app-pause")
     })
+
     socket.on("app-stop", () => {
         console.log("Dashboard > App : Stop")
+        events.push({
+            type: "stop",
+            date: new Date()
+        })
         io.emit("app-stop")
         if(simulationStart !== 0) {
             console.log("App Stopped. Start Export Procedure.")
             // Export
+            times = {
+                "start": simulationStart,
+                "immersion": new Date(), // to be changed
+                "end": new Date(),
+                "events": events
+            }
+
+            fs.writeFile(dirPath + "/times.json", JSON.stringify(times, null, 2), 'utf8', err => {
+                if (err) throw err;
+                console.log('File has been saved!');
+            });
         }
     })
     socket.on("dashboard-new-doctor", (data) => {
@@ -193,7 +222,7 @@ const getApiAndEmit = socket => {
 let spBpm = new SerialPort("COM4", {
     baudRate: 9600
 });
-const parseBpm = spBpm.pipe(new Readline({ delimiter: '\r\n' }));
+const parserBpm = spBpm.pipe(new Readline({ delimiter: '\r\n' }));
 
 spBpm.on("open", function() {
     console.log('COM4 opened (first USB port on the front of the computer)');
@@ -202,6 +231,7 @@ spBpm.on("open", function() {
         console.log('Data received from COM4: ' + data);
         if(simulationStart !== 0) {
             const serverClock = (new Date()) - simulationStart;
+            counterBpm += 1
             if(lastBpmData.length >= lengthData) {
                 lastBpmData.shift();
             }
@@ -209,23 +239,41 @@ spBpm.on("open", function() {
                 x: serverClock,
                 y: parseInt(data, 10)
             });
+            if(counterBpm >= 50) {
+                counterBpm = 0
+                fs.readFile(dirPath + "/bpm.json", 'utf8', function readFileCallback(err, bpmJson) {
+                    if (err) {
+                        bpmJson = lastBpmData
+                    } else {
+                        bpmJson = JSON.parse(bpmJson)
+                        bpmJson.push(...lastBpmData)
+                    }
+
+                    fs.writeFile(dirPath + "/bpm.json", JSON.stringify(bpmJson, null, 2), 'utf8', err => {
+                        if (err) throw err;
+                        console.log('File has been saved!');
+                    });
+                });
+            }
         }
     });
 });
 
 // Breath Sensor
-let spBreath = new SerialPort("COM4", {
+let spBreath = new SerialPort("COM5", {
     baudRate: 9600
 });
 const parserBreath = spBreath.pipe(new Readline({ delimiter: '\r\n' }));
 
 spBreath.on("open", function() {
-    console.log('COM4 opened (first USB port on the front of the computer)');
+    console.log('COM5 opened (first USB port on the front of the computer)');
     status.breathSensor = 1;
+
     parserBreath.on('data', function(data) {
-        console.log('Data received from COM4: ' + data);
+        console.log('Data received from COM5: ' + data);
         if(simulationStart !== 0) {
             const serverClock = (new Date()) - simulationStart;
+            counterBreath += 1
             if(lastBreathData.length >= lengthData) {
                 lastBreathData.shift();
             }
@@ -233,9 +281,25 @@ spBreath.on("open", function() {
                 x: serverClock,
                 y: parseInt(data, 10)
             });
+            if(counterBreath >= 50) {
+                counterBreath = 0
+                fs.readFile(dirPath + "/breath.json", 'utf8', function readFileCallback(err, breathJson) {
+                    if (err) {
+                        breathJson = lastBreathData
+                    } else {
+                        breathJson = JSON.parse(breathJson)
+                        breathJson.push(...lastBreathData)
+                    }
+
+                    fs.writeFile(dirPath + "/breath.json", JSON.stringify(breathJson, null, 2), 'utf8', err => {
+                        if (err) throw err;
+                        console.log('File has been saved!');
+                    });
+                });
+            }
         }
     });
-});
+}); 
 
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
