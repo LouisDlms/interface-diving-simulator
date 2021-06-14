@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const doctorsPath = './config/doctors.json';
 const patientsPath = './config/patients.json';
+const dataPath = './data';
 
 router.get("/", (req, res) => {
   res.send({ response: "SocketIO server on" }).status(200);
@@ -25,6 +26,38 @@ router.get("/users", (req, res) => {
           res.send(users).status(200);
       })
   })
+});
+
+router.get("/data", (req, res) => {
+  dataToSend = []
+
+  fs.readdirSync(dataPath, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => {
+        dat = dirent.name
+        jsonContent = {}
+        content = dat.split("_") // ID - Date - Users (docteur + patient)
+        
+        jsonContent.id = content[0]
+        jsonContent.date = content[1]
+        idUsers = content[2].split("-")
+
+
+        fs.readFile(doctorsPath, 'utf8', (err, doctorsJson) => {
+          doctorsJson = JSON.parse(doctorsJson)
+          doctor = doctorsJson.filter(doctor => (doctor.id === parseInt(idUsers[0])))[0]
+          jsonContent.doctor = doctor.firstName + " " + doctor.lastName.toUpperCase()
+        })
+        fs.readFile(patientsPath, 'utf8', (err, patientsJson) => {
+          patientsJson = JSON.parse(patientsJson)
+          patient = patientsJson.filter(patient => (patient.id === parseInt(idUsers[1])))[0]
+          jsonContent.patient = patient.firstName + " " + patient.lastName.toUpperCase()
+        })
+
+        dataToSend.push(jsonContent)
+      })
+  
+  setTimeout(() => res.send(dataToSend).status(200), 1000)
 });
 
 module.exports = router;

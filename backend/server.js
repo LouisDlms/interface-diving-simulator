@@ -1,19 +1,23 @@
 process.env.TZ = 'Europe/Paris'
 
 const express = require("express");
+const router = express.Router();
 const http = require("http");
 const socketIo = require("socket.io");
 const SerialPort = require("serialport");
 const Readline = require('@serialport/parser-readline');
 const fs = require('fs');
 const exec = require('child_process').exec;
+const archiver = require('archiver');
 
 const configPath = './config/config.json';
 const doctorsPath = './config/doctors.json';
 const patientsPath = './config/patients.json';
+const dataPath = './data';
 
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
+const { route } = require("./routes/index");
 
 const app = express();
 // Add headers
@@ -212,6 +216,50 @@ io.on("connection", (socket) => {
     socket.on("dashboard-update-users", (data) => {
         console.log("Dashboard : Update Current Users")
         users = data
+    })
+
+    socket.on("dashboard-export", (dataId) => {
+        // data : study id
+        // Look for the correct folder
+        let pathData;
+        let newPathData;
+        dataId = parseInt(dataId)
+
+        fs.readdirSync(dataPath, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => {
+            dat = dirent.name
+            content = dat.split("_") // ID - Date - Users (docteur + patient)
+            id = parseInt(content[0])
+
+            if(dataId === id) {
+                pathData = dat
+                newPathData = content[0] + "_" + content[1]
+            }
+        })
+
+        const finalPath = dataPath + "/" + pathData
+        let output = fs.createWriteStream(finalPath + "/" + newPathData + ".zip");
+        let archive = archiver('zip');
+
+        output.on('close', function () {
+            console.log(archive.pointer() + ' total bytes');
+            console.log('archiver has been finalized and the output file descriptor has closed.');
+        });
+        
+        archive.on('error', function(err){
+            throw err;
+        });
+        
+        archive.pipe(output);
+        
+        // append files from a sub-directory, putting its contents at the root of archive
+        archive.directory(finalPath, false); // false => newPathData to rename ?
+        
+        // append files from a sub-directory and naming it `new-subdir` within the archive
+        //archive.directory('subdir/', 'new-subdir');
+        
+        archive.finalize();
     })
 
     socket.on("disconnect", () => {

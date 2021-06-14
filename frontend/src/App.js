@@ -7,6 +7,8 @@ import Dashboard from "./Dashboard"
 import Home from "./Home.js";
 import NewEntry from "./NewEntry";
 import MedicalReport from "./MedicalReport";
+import Export from "./Export"
+import ExportId from "./ExportId"
 import { Col } from "react-bootstrap";
 import store from "./store"
 
@@ -29,8 +31,16 @@ class App extends React.Component {
                   store={ store }
                 />
               </Route>
+              <Route path="/export/:id" render={({match}) => (
+                <ExportId
+                  store={ store }
+                  id={ match.params.id }
+                />
+              )}/>
               <Route path="/export">
-                {/* <Export/> */}
+                <Export
+                  store={ store }
+                />
               </Route>
               <Route path="/new-entry">
                 <NewEntry

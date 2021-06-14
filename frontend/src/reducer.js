@@ -1,8 +1,7 @@
 import io from "socket.io-client";
 
-const ENDPOINT = "http://localhost:4001"
-
 const initialState = {
+    ENDPOINT: "http://localhost:4001",
     status: {
         app: 0,
         server: 0,
@@ -22,7 +21,7 @@ const initialState = {
         weight: 0,
         height: 0
     },
-    socket: io(ENDPOINT, {
+    socket: io("http://localhost:4001", {
         transports: ['websocket'],
     }),
     simulationStart: 0,
