@@ -31,28 +31,28 @@ class Export extends React.Component {
                             Exportation des données
                         </Card.Header>
                         <Card.Body>
-                            <Table striped bordered hover>
+                            <Table striped bordered>
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Date</th>
                                         <th>Docteur</th>
                                         <th>Patient</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     { this.state.data.length ? this.state.data.map(data => (
-                                        <Link to={"/export/" + data.id}>
-                                            <tr>
-                                                <td>{ data.id }</td>
-                                                <td>{ data.date }</td>
-                                                <td>{ data.doctor }</td>
-                                                <td>{ data.patient }</td>
-                                            </tr> 
-                                        </Link>
+                                        <tr>
+                                            <td>{ data.id }</td>
+                                            <td>{ data.date }</td>
+                                            <td>{ data.doctor }</td>
+                                            <td>{ data.patient }</td>
+                                            <td><Link to={ "export/" + data.id }>Exporter</Link></td>
+                                        </tr>
                                     )) : (
                                         <tr>
-                                            <td colSpan="4">Chargement en cours...</td>
+                                            <td colSpan="5">Chargement en cours...</td>
                                         </tr> 
                                     )}
                                 </tbody>

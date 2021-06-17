@@ -18,7 +18,7 @@ router.get("/launch-app", (req, res) => {
 });
 
 router.get("/users", (req, res) => {
-  users = {}
+  let users = {}
   fs.readFile(doctorsPath, 'utf8', (err, data) => {
       users.doctors = JSON.parse(data)
       fs.readFile(patientsPath, 'utf8', (err, data) => {
@@ -29,35 +29,36 @@ router.get("/users", (req, res) => {
 });
 
 router.get("/data", (req, res) => {
-  dataToSend = []
+  let dataToSend = []
 
-  fs.readdirSync(dataPath, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
+  fs.readdir(dataPath, { withFileTypes: true }, function(err, tmpData) {
+    const lengthData = tmpData.length
+
+    tmpData.filter(dirent => dirent.isDirectory())
     .map(dirent => {
-        dat = dirent.name
-        jsonContent = {}
-        content = dat.split("_") // ID - Date - Users (docteur + patient)
-        
-        jsonContent.id = content[0]
-        jsonContent.date = content[1]
-        idUsers = content[2].split("-")
+      dat = dirent.name
+      jsonContent = {}
+      content = dat.split("_") // ID - Date - Users (docteur + patient)
+      
+      jsonContent.id = content[0]
+      jsonContent.date = content[1]
+      idUsers = content[2].split("-")
 
+      doctorsJson = fs.readFileSync(doctorsPath, 'utf8')
+      doctorsJson = JSON.parse(doctorsJson)
+      doctor = doctorsJson.filter(doctor => (doctor.id === parseInt(idUsers[0])))[0]
+      jsonContent.doctor = doctor.firstName + " " + doctor.lastName.toUpperCase()
 
-        fs.readFile(doctorsPath, 'utf8', (err, doctorsJson) => {
-          doctorsJson = JSON.parse(doctorsJson)
-          doctor = doctorsJson.filter(doctor => (doctor.id === parseInt(idUsers[0])))[0]
-          jsonContent.doctor = doctor.firstName + " " + doctor.lastName.toUpperCase()
-        })
-        fs.readFile(patientsPath, 'utf8', (err, patientsJson) => {
-          patientsJson = JSON.parse(patientsJson)
-          patient = patientsJson.filter(patient => (patient.id === parseInt(idUsers[1])))[0]
-          jsonContent.patient = patient.firstName + " " + patient.lastName.toUpperCase()
-        })
+      patientsJson = fs.readFileSync(patientsPath, 'utf8')
+      patientsJson = JSON.parse(patientsJson)
+      patient = patientsJson.filter(patient => (patient.id === parseInt(idUsers[1])))[0]
+      jsonContent.patient = patient.firstName + " " + patient.lastName.toUpperCase()
 
-        dataToSend.push(jsonContent)
-      })
-  
-  setTimeout(() => res.send(dataToSend).status(200), 1000)
+      dataToSend.push(jsonContent)
+    })
+
+    res.send(dataToSend).status(200)
+  })
 });
 
 module.exports = router;
