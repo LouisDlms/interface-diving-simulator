@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, ListGroup, Button, Form } from "react-bootst
 import { VscCircleFilled } from "react-icons/vsc"
 import { FaPlay, FaPause, FaStop } from "react-icons/fa"
 import { GiDoubleFish, GiFishingBoat, GiTurtle, GiDoctorFace } from "react-icons/gi"
-import { BsMicFill, BsPersonLinesFill } from "react-icons/bs"
+import { BsCreditCard, BsMicFill, BsPersonLinesFill } from "react-icons/bs"
 import { RiHeadphoneFill } from "react-icons/ri"
 import {
     XYPlot,
@@ -33,7 +33,7 @@ class Dashboard extends React.Component {
     }
 
     componentDidMount() {
-        fetch(ENDPOINT + "/launch-app")
+        // fetch(ENDPOINT + "/launch-app")
         this.store.dispatch({ type: 'status/app/sync' })
 
         this.unsubscribe = this.store.subscribe(() => {
@@ -99,6 +99,16 @@ class Dashboard extends React.Component {
         this.state.socket.emit("app-stop")
     }
 
+    appBpm = (mode) => {
+        console.log("Bpm Mode : " + mode)
+        this.state.socket.emit("app-bpm", mode)
+    }
+
+    appEvent = (id) => {
+        console.log("Event : " + id)
+        this.state.socket.emit("app-event", id)
+    }
+
     render() {
         console.log( this.state.sensors.bpm )
         return (
@@ -151,8 +161,8 @@ class Dashboard extends React.Component {
                             </Card.Body>
                         </Card>
 
-                        { /* Communication */ }
-                        <Card className="mt-2">
+                        { /* Communication 
+                         <Card className="mt-2">
                             <Card.Body className="d-flex flex-column">
                                 <Card.Title>Interagir avec le patient</Card.Title>
                                 <div className="d-flex">
@@ -164,6 +174,13 @@ class Dashboard extends React.Component {
                                     <Form.Control type="range" />
                                 </div>
                                 <Button className="align-self-end">Parler au patient</Button>
+                            </Card.Body>
+                        </Card> */}
+
+                        <Card className="mt-2">
+                            <Card.Body className="d-flex flex-column">
+                                <Card.Title>BPM entendu par le patient</Card.Title>
+                                <Form.Control type="range" min="0" max="5" step="1" defaultValue="1" onChange={ (e) => this.appBpm(e.target.value) }/>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -209,14 +226,14 @@ class Dashboard extends React.Component {
                             <Card.Body>
                                 <Card.Title>Déclencher des évènements</Card.Title>
                                 <ListGroup as="ul">
-                                    <ListGroup.Item as="li" className="event-button">
-                                        <GiDoubleFish className="control-button"/>Banc de poissons
+                                    <ListGroup.Item as="li" className="event-button" onClick={ () => this.appEvent(0) }>
+                                        <BsMicFill className="control-button"/>Signal radio
                                     </ListGroup.Item>
-                                    <ListGroup.Item as="li" className="event-button">
-                                        <GiFishingBoat className="control-button"/>Bateau à proximité
+                                    <ListGroup.Item as="li" className="event-button" onClick={ () => this.appEvent(1) }>
+                                        <GiFishingBoat className="control-button"/>Démarrage d'un bateau
                                     </ListGroup.Item>
-                                    <ListGroup.Item as="li" className="event-button">
-                                        <GiTurtle className="control-button"/>TORTUE !
+                                    <ListGroup.Item as="li" className="event-button" onClick={ () => this.appEvent(1) }>
+                                        <GiFishingBoat className="control-button"/>Arrêt d'un bateau
                                     </ListGroup.Item>
                                 </ListGroup>
                             </Card.Body>

@@ -179,6 +179,13 @@ io.on("connection", (socket) => {
             })
         }
     })
+
+    socket.on("app-bpm", (mode) => {
+        console.log("Dashboard > App : BPM Mode " + mode)
+        io.emit("app-bpm", mode)
+    })
+
+
     socket.on("dashboard-new-doctor", (data) => {
         console.log("Dashboard : New Doctor")
         fs.readFile(doctorsPath, 'utf8', function readFileCallback(err, doctors) {
