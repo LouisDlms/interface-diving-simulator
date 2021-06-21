@@ -185,6 +185,10 @@ io.on("connection", (socket) => {
         io.emit("app-bpm", mode)
     })
 
+    socket.on("app-event", (id) => {
+        console.log("Dashboard > App : Event ID " + id)
+        io.emit("app-event", id)
+    })
 
     socket.on("dashboard-new-doctor", (data) => {
         console.log("Dashboard : New Doctor")

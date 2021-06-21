@@ -23,16 +23,28 @@ a:hover {
     z-index: 1;
 }
 
+.event-icon {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
 .control-button {
     width: 25px;
     height: 25px;
     margin: 0 5px;
     cursor: pointer;
+    color: white;
+}
+
+.control-button:hover {
+    color: lightgrey;
 }
 
 .event-button:hover {
     background-color:cornflowerblue;
-    color: white;
+    color: white !important;
     cursor: pointer;
 }
 

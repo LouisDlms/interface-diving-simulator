@@ -227,13 +227,13 @@ class Dashboard extends React.Component {
                                 <Card.Title>Déclencher des évènements</Card.Title>
                                 <ListGroup as="ul">
                                     <ListGroup.Item as="li" className="event-button" onClick={ () => this.appEvent(0) }>
-                                        <BsMicFill className="control-button"/>Signal radio
+                                        <BsMicFill className="event-icon"/>Signal radio
                                     </ListGroup.Item>
                                     <ListGroup.Item as="li" className="event-button" onClick={ () => this.appEvent(1) }>
-                                        <GiFishingBoat className="control-button"/>Démarrage d'un bateau
+                                        <GiFishingBoat className="event-icon"/>Démarrage d'un bateau
                                     </ListGroup.Item>
                                     <ListGroup.Item as="li" className="event-button" onClick={ () => this.appEvent(1) }>
-                                        <GiFishingBoat className="control-button"/>Arrêt d'un bateau
+                                        <GiFishingBoat className="event-icon"/>Arrêt d'un bateau
                                     </ListGroup.Item>
                                 </ListGroup>
                             </Card.Body>

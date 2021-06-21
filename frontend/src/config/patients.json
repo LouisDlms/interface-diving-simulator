@@ -1,0 +1,11 @@
+[
+    {
+        "id": 0,
+        "firstName": "François",
+        "lastName": "Mazé",
+        "birthDay": "2000-01-01",
+        "sex": "M",
+        "weight": "120",
+        "height": "180"
+    }
+]
