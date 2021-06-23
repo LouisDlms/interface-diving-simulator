@@ -5,7 +5,8 @@ const initialState = {
     status: {
         app: 0,
         server: 0,
-        bpm: 0
+        bpm: 0,
+        breath: 0
     },
     doctor: {
         id: 0,
@@ -33,7 +34,8 @@ const initialState = {
     sensors: {
         bpm: [],
         breath: []
-    }
+    },
+    phase: 0
 }
 
 // Use the initialState as a default value
@@ -50,7 +52,8 @@ export default function appReducer(state = initialState, action) {
                 status: {
                     app: 0,
                     server: state.status.server,
-                    bpm: state.status.bpm
+                    bpm: state.status.bpm,
+                    breath: state.status.breath
                 }
             }
         }
@@ -64,7 +67,8 @@ export default function appReducer(state = initialState, action) {
                 status: {
                     app: 1,
                     server: state.status.server,
-                    bpm: state.status.bpm
+                    bpm: state.status.bpm,
+                    breath: state.status.breath
                 }
             }
         }
@@ -78,7 +82,8 @@ export default function appReducer(state = initialState, action) {
                 status: {
                     app: 2,
                     server: state.status.server,
-                    bpm: state.status.bpm
+                    bpm: state.status.bpm,
+                    breath: state.status.breath
                 }
             }
         }
@@ -92,7 +97,8 @@ export default function appReducer(state = initialState, action) {
                 status: {
                     app: state.status.app,
                     server: 0,
-                    bpm: state.status.bpm
+                    bpm: state.status.bpm,
+                    breath: state.status.breath
                 }
             }
         }
@@ -106,7 +112,8 @@ export default function appReducer(state = initialState, action) {
                 status: {
                     app: state.status.app,
                     server: 1,
-                    bpm: state.status.bpm
+                    bpm: state.status.bpm,
+                    breath: state.status.breath
                 }
             }
         }
@@ -120,7 +127,8 @@ export default function appReducer(state = initialState, action) {
                 status: {
                     app: state.status.app,
                     server: 2,
-                    bpm: state.status.bpm
+                    bpm: state.status.bpm,
+                    breath: state.status.breath
                 }
             }
         }
@@ -169,13 +177,21 @@ export default function appReducer(state = initialState, action) {
             }
         }
 
+        case 'phase/set': {
+            return {
+                ...state,
+                phase: action.payload
+            }
+        }
+
         case 'status/bpm/ok': {
             return {
                 ...state,
                 status: {
                     app: state.status.app,
                     server: state.status.server,
-                    bpm: 1
+                    bpm: 1,
+                    breath: state.status.breath
                 }
             }
         }
@@ -186,6 +202,28 @@ export default function appReducer(state = initialState, action) {
                 sensors: {
                     bpm: action.payload,
                     breath: state.sensors.breath
+                }
+            }
+        }
+
+        case 'status/breath/ok': {
+            return {
+                ...state,
+                status: {
+                    app: state.status.app,
+                    server: state.status.server,
+                    bpm: state.status.bpm,
+                    breath: 1
+                }
+            }
+        }
+
+        case 'breath/update': {
+            return {
+                ...state,
+                sensors: {
+                    bpm: state.sensors.bpm,
+                    breath: action.payload
                 }
             }
         }

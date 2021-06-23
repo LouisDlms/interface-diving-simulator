@@ -43,9 +43,13 @@ class Dashboard extends React.Component {
         this.state.socket.on("ping", data => {
             if(data !== undefined) {
                 this.store.dispatch({ type: 'serverClock/update', payload: data.deltaTime })
-                if(data.bpmReady === 1) {
+                if(data.status.bpmSensor === 1) {
                     this.store.dispatch({ type: 'status/bpm/ok' })
-                    this.store.dispatch({ type: 'bpm/update', payload: data.bpm })
+                    this.store.dispatch({ type: 'bpm/update', payload: data.data.bpm })
+                }
+                if(data.status.breathSensor === 1) {
+                    this.store.dispatch({ type: 'status/breath/ok' })
+                    this.store.dispatch({ type: 'breath/update', payload: data.data.breath })
                 }
             }
         });
@@ -53,11 +57,27 @@ class Dashboard extends React.Component {
         this.state.socket.on("sync", data => {
             this.store.dispatch({ type: 'status/app/ok' })
             this.store.dispatch({ type: 'simulationStart/set', payload: data })
+            if(this.state.phase !== 2) {
+                this.store.dispatch({ type: 'phase/set', payload: 1 })
+            }
         })
     }
 
     componentWillUnmount() {
         this.unsubscribe()
+    }
+
+    getPhaseStatus = () => {
+        let phase = this.state.phase
+
+        switch(phase) {
+            case 0:
+                return [0, "Synchronisation en cours"]
+            case 1:
+                return [1, "Immersion"]
+            case 2:
+                return [2, "Plongée"]
+        }
     }
 
     getInfo(who) {
@@ -109,6 +129,12 @@ class Dashboard extends React.Component {
         this.state.socket.emit("app-event", id)
     }
 
+    appDiving = () => {
+        console.log("Diving asked")
+        this.state.socket.emit("app-diving")
+        this.store.dispatch({ type: 'phase/set', payload: 2 })
+    }
+
     render() {
         console.log( this.state.sensors.bpm )
         return (
@@ -157,25 +183,17 @@ class Dashboard extends React.Component {
                             <Card.Body>
                                 <Card.Title>Temps écoulé : { this.state.serverClock.hours }h{ this.state.serverClock.minutes }min{ this.state.serverClock.seconds }s</Card.Title>
                                 { (this.state.simulationStart === 0) ? "En attente de synchronisation" : "Simulation démarrée à " + this.state.simulationStart }
-                                <br/><strong>Phase 0 - Synchronisation</strong>
+                                <br/><strong>Phase { this.getPhaseStatus()[0] } - { this.getPhaseStatus()[1] }</strong>
                             </Card.Body>
+                            
+                            { (this.getPhaseStatus()[0] === 1) ? (
+                            <Card.Footer>
+                                <Button variant="primary" onClick={ this.appDiving }>
+                                    Démarrer la plongée
+                                </Button>
+                            </Card.Footer>
+                             ) : "" }
                         </Card>
-
-                        { /* Communication 
-                         <Card className="mt-2">
-                            <Card.Body className="d-flex flex-column">
-                                <Card.Title>Interagir avec le patient</Card.Title>
-                                <div className="d-flex">
-                                    <BsMicFill className="control-button mr-3"/>
-                                    <Form.Control type="range" />
-                                </div>
-                                <div className="d-flex">
-                                    <RiHeadphoneFill className="control-button mr-3"/>
-                                    <Form.Control type="range" />
-                                </div>
-                                <Button className="align-self-end">Parler au patient</Button>
-                            </Card.Body>
-                        </Card> */}
 
                         <Card className="mt-2">
                             <Card.Body className="d-flex flex-column">
@@ -217,7 +235,7 @@ class Dashboard extends React.Component {
                                 data={ this.state.sensors.breath.length ? this.state.sensors.breath : [{x:0, y:0}]}
                             />
                             { /* Status */ }
-                            <VscCircleFilled color="red" className="led-chart"/>
+                            <VscCircleFilled color={ this.getSensorStatus("breath") } className="led-chart"/>
                         </FlexibleXYPlot>
                     </Col>
                     <Col>
@@ -232,7 +250,7 @@ class Dashboard extends React.Component {
                                     <ListGroup.Item as="li" className="event-button" onClick={ () => this.appEvent(1) }>
                                         <GiFishingBoat className="event-icon"/>Démarrage d'un bateau
                                     </ListGroup.Item>
-                                    <ListGroup.Item as="li" className="event-button" onClick={ () => this.appEvent(1) }>
+                                    <ListGroup.Item as="li" className="event-button" onClick={ () => this.appEvent(2) }>
                                         <GiFishingBoat className="event-icon"/>Arrêt d'un bateau
                                     </ListGroup.Item>
                                 </ListGroup>

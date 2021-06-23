@@ -47,6 +47,7 @@ let status = {
     breathSensor: 0
 }
 let simulationStart = 0;
+let simulationDiving = 0;
 let dirPath;
 let config;
 let users = {
@@ -152,8 +153,8 @@ io.on("connection", (socket) => {
             console.log("App Stopped. Start Export Procedure.")
             // Export
             times = {
-                "start": simulationStart,
-                "immersion": new Date(), // to be changed
+                "immersion": simulationStart,
+                "diving": simulationDiving, // to be changed
                 "end": new Date(),
                 "events": events
             }
@@ -188,6 +189,12 @@ io.on("connection", (socket) => {
     socket.on("app-event", (id) => {
         console.log("Dashboard > App : Event ID " + id)
         io.emit("app-event", id)
+    })
+
+    socket.on("app-diving", () => {
+        simulationDiving = new Date()
+        console.log("Dashboard > App : Diving")
+        io.emit("app-diving")
     })
 
     socket.on("dashboard-new-doctor", (data) => {
@@ -283,8 +290,11 @@ io.on("connection", (socket) => {
 const getApiAndEmit = socket => {
     const data = {
         deltaTime: 0,
-        bpmReady: status.bpmSensor,
-        bpm: lastBpmData
+        status: status,
+        data: {
+            bpm: lastBpmData,
+            breath: lastBreathData 
+        }
     }
 
     if(simulationStart !== 0) {

@@ -25,5 +25,14 @@
     "weight": 78,
     "height": 189,
     "id": 2
+  },
+  {
+    "firstName": "Alexandre",
+    "lastName": "Grenier",
+    "birthDay": "2001-06-15",
+    "sex": "M",
+    "weight": 72,
+    "height": 173,
+    "id": 3
   }
 ]
