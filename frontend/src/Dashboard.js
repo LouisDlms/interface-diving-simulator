@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Container, Row, Col, Card, ListGroup, Button, Form } from "react-bootstrap"
 import { VscCircleFilled } from "react-icons/vsc"
 import { FaPlay, FaPause, FaStop } from "react-icons/fa"
-import { GiDoubleFish, GiFishingBoat, GiTurtle, GiDoctorFace } from "react-icons/gi"
-import { BsCreditCard, BsMicFill, BsPersonLinesFill } from "react-icons/bs"
-import { RiHeadphoneFill } from "react-icons/ri"
+import { GiFishingBoat, GiDoctorFace } from "react-icons/gi"
+import { BsMicFill, BsPersonLinesFill } from "react-icons/bs"
 import {
     XYPlot,
     XAxis,

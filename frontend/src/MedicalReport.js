@@ -1,15 +1,16 @@
 import React from "react"
 import { Card, Form, Col, Button, InputGroup } from "react-bootstrap"
 import { GiDoctorFace } from "react-icons/gi"
-import { BsPersonLinesFill } from "react-icons/bs"
-import { AiOutlinePlusCircle } from "react-icons/ai"
 import { Link } from "react-router-dom"
 
-class NewEntry extends React.Component {
+class MedicalReport extends React.Component {
     constructor(props) {
         super(props)
         
         this.store = props.store
+        this.state = {
+            // add fields
+        }
         this.unsubscribe = () => {}
     }
 
@@ -28,12 +29,12 @@ class NewEntry extends React.Component {
         return (
             <div className="h-vh">
                 <div className="center-box">
-                    {/* <Card>
+                    <Card>
                         <Card.Header as="h5">
-                            <BsPersonLinesFill/>&nbsp;&nbsp;Ajout d'un patient
+                            <GiDoctorFace />&nbsp;&nbsp;Rapport médical
                         </Card.Header>
                         <Card.Body>
-                            <Form onSubmit={ this.savePatient }>
+                            <Form onSubmit={ this.save }>
                                 <Form.Row>
                                     <Form.Group as={Col} controlId="firstName">
                                         <Form.Label>Prénom</Form.Label>
@@ -89,18 +90,18 @@ class NewEntry extends React.Component {
                                     </Form.Group>
                                 </Form.Row>
 
-                                <Link to="/" onClick={ this.savePatient }>
-                                    <Button variant="primary" className="mt-4 text-left align-middle">
-                                            <AiOutlinePlusCircle className="control-button"/>&nbsp;Nouvelle entrée
+                                <Link to="/" onClick={ this.save }>
+                                    <Button variant="primary" className="mt-4">
+                                        Terminer
                                     </Button>
                                 </Link>
                             </Form>
                         </Card.Body>
-                    </Card> */}
+                    </Card>
                 </div>
             </div>
         )
     }
 }
 
-export default NewEntry
+export default MedicalReport

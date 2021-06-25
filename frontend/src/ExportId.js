@@ -8,13 +8,23 @@ class ExportId extends React.Component {
         
         this.store = props.store
         this.state = {
-            id: props.id
+            id: props.id,
+            downloadLink: ""
         }
         this.unsubscribe = () => {}
     }
 
     componentDidMount() {
         this.store.getState().socket.emit("dashboard-export", this.state.id)
+        let waitZipInterval = setInterval(() => fetch("http://localhost:4001/data/" + this.state.id).then(res => {
+            if(res.status === 200) {
+                this.setState({
+                    ...this.state,
+                    downloadLink: "http://localhost:4001/data/" + this.state.id
+                })
+                waitZipInterval = 0;
+            }
+        }), 2000)
     }
 
     render() {
@@ -26,7 +36,15 @@ class ExportId extends React.Component {
                             Exportation des données
                         </Card.Header>
                         <Card.Body>
-                            
+                            { this.state.downloadLink.length ? (
+                                <a href={ this.state.downloadLink } download>
+                                    Télécharger l'archive anonymisée
+                                </a>
+                            ) : (
+                                <span>
+                                    Chargement en cours...
+                                </span>
+                            ) }
                         </Card.Body>
                     </Card>
                 </div>

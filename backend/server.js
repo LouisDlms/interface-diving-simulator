@@ -1,7 +1,6 @@
 process.env.TZ = 'Europe/Paris'
 
 const express = require("express");
-const router = express.Router();
 const http = require("http");
 const socketIo = require("socket.io");
 const SerialPort = require("serialport");
@@ -17,7 +16,7 @@ const dataPath = './data';
 
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
-const { route } = require("./routes/index");
+const router = express.Router()
 
 const app = express();
 // Add headers
@@ -252,7 +251,7 @@ io.on("connection", (socket) => {
 
             if(dataId === id) {
                 pathData = dat
-                newPathData = content[0] + "_" + content[1]
+                newPathData = id
             }
         })
 
@@ -274,10 +273,11 @@ io.on("connection", (socket) => {
         // append files from a sub-directory, putting its contents at the root of archive
         archive.directory(finalPath, false); // false => newPathData to rename ?
         
-        // append files from a sub-directory and naming it `new-subdir` within the archive
-        //archive.directory('subdir/', 'new-subdir');
-        
         archive.finalize();
+
+        app.get("/data/" + newPathData, (req, res) => {
+            res.download(finalPath + "/" + newPathData + ".zip")
+        })
     })
 
     socket.on("disconnect", () => {
