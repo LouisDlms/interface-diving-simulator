@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf8"/>
+        <link href="static/index.css" type="text/css" rel="stylesheet"/>
+
+        <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
+        <script src="https://cdn.anychart.com/releases/v8/js/anychart-ui.min.js"></script>
+        <script src="https://cdn.anychart.com/releases/v8/js/anychart-exports.min.js"></script>
+        <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
+        <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
+
+        <title>{{date}} - Plongée Virtuelle</title>
+    </head>
+
+    <body>
+        <script>
+            times = {{times}};
+            bpmData = {{bpmData}};
+            breathData = {{breathData}};
+        </script>
+        <div id="chart-container"></div>
+
+        <video controls id="video">
+            <source src={{src-video}}
+                    type="video/mp4">
+        
+            Sorry, your browser doesn't support embedded videos.
+        </video>
+        
+        <script src="static/main.js" type="text/javascript"></script>
+    </body>
+</html>

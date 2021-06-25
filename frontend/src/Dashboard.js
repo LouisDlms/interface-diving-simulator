@@ -33,7 +33,7 @@ class Dashboard extends React.Component {
     }
 
     componentDidMount() {
-        // fetch(ENDPOINT + "/launch-app")
+        fetch(ENDPOINT + "/launch-app")
         this.store.dispatch({ type: 'status/app/sync' })
 
         this.unsubscribe = this.store.subscribe(() => {
