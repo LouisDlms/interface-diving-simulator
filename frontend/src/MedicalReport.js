@@ -9,14 +9,17 @@ class MedicalReport extends React.Component {
         
         this.store = props.store
         this.state = {
-            // add fields
+            commentary: ""
         }
         this.unsubscribe = () => {}
     }
 
     updateField = (field, e) => {
         switch(field) {
-            case "":
+            case "commentary":
+                this.state.commentary = e.target.value
+                break
+            default:
                 break
         }
     }
@@ -35,60 +38,10 @@ class MedicalReport extends React.Component {
                         </Card.Header>
                         <Card.Body>
                             <Form onSubmit={ this.save }>
-                                <Form.Row>
-                                    <Form.Group as={Col} controlId="firstName">
-                                        <Form.Label>Prénom</Form.Label>
-                                        <Form.Control onChange={ (e) => this.updateField("patient-firstName", e) }/>
-                                    </Form.Group>
-
-                                    <Form.Group as={Col} controlId="lastName">
-                                        <Form.Label>Nom</Form.Label>
-                                        <Form.Control onChange={ (e) => this.updateField("patient-lastName", e) }/>
-                                    </Form.Group>
-                                </Form.Row>
-
-                                <Form.Group controlId="formGridAddress1">
-                                    <Form.Label>Date de naissance</Form.Label>
-                                    <Form.Control type="date" onChange={ (e) => this.updateField("patient-birthDay", e) } />
+                                <Form.Group controlId="formGeneralCommentary">
+                                    <Form.Label>Commentaire général</Form.Label>
+                                    <Form.Control as="textarea" rows={4} onChange={ (e) => this.updateField("commentary", e) } />
                                 </Form.Group>
-
-                                <Form.Row>
-                                    <Form.Group as={Col} controlId="formGridCity">
-                                        <Form.Label>Sexe</Form.Label>
-                                        <Form.Control as="select" onChange={ (e) => this.updateField("patient-sex", e) }>
-                                            <option value="M">M</option>
-                                            <option value="F">F</option>
-                                        </Form.Control>
-                                    </Form.Group>
-
-                                    <Form.Group as={Col} controlId="formGridState">
-                                        <Form.Label>Poids</Form.Label>
-                                        <InputGroup className="mb-3">
-                                            <Form.Control
-                                                type="number"
-                                                min="0"
-                                                aria-describedby="basic-addon1"
-                                                onChange={ (e) => this.updateField("patient-weight", e) } />
-                                            <InputGroup.Append>
-                                                <InputGroup.Text id="basic-addon1">kg</InputGroup.Text>
-                                            </InputGroup.Append>
-                                        </InputGroup>
-                                    </Form.Group>
-
-                                    <Form.Group as={Col} controlId="formGridZip">
-                                        <Form.Label>Taille</Form.Label>
-                                        <InputGroup className="mb-3">
-                                            <Form.Control
-                                                type="number"
-                                                min="0"
-                                                aria-describedby="basic-addon2"
-                                                onChange={ (e) => this.updateField("patient-height", e) } />
-                                            <InputGroup.Append>
-                                                <InputGroup.Text id="basic-addon2">cm</InputGroup.Text>
-                                            </InputGroup.Append>
-                                        </InputGroup>
-                                    </Form.Group>
-                                </Form.Row>
 
                                 <Link to="/" onClick={ this.save }>
                                     <Button variant="primary" className="mt-4">

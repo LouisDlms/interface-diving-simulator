@@ -239,10 +239,20 @@ io.on("connection", (socket) => {
             }
         });
     })
+
     socket.on("dashboard-update-users", (data) => {
         console.log("USERS : Dashboard : Update Current Users")
         usersChanged = true
         users = data
+    })
+
+    socket.on("dashboard-medical-report", data => {
+        console.log("EXPORT : Dashboard : Medical Report")
+        
+        fs.writeFile(dirPath + "/medical-report.json", JSON.stringify(data, null, 2), 'utf8', err => {
+            if (err) throw err;
+            console.log('File has been saved!');
+        });
     })
 
     socket.on("dashboard-export", (dataId) => {
