@@ -49,6 +49,8 @@ let simulationStart = 0;
 let simulationDiving = 0;
 let dirPath;
 let config;
+
+let usersChanged = false;
 let users = {
     doctor: {
         id: 0,
@@ -78,13 +80,19 @@ fs.readFile(configPath, 'utf8', (err, data) => {
     config = JSON.parse(data)
 })
 
+let clients = {
+    app: 0,
+    dashboard: 0
+};
+
 io.on("connection", (socket) => {
-    console.log("Someone connected, waiting for identification")
+    console.log("CONNECTION : Someone connected, waiting for identification")
     socket.on("who", (data) => {
         switch(data) {
             case "dashboard":
                 console.log("Dashboard connected!")
-                status.dashboard = socket.id
+                clients.dashboard = socket
+                status.dashboard = 2
 
                 // Server Clock
                 if (interval) {
@@ -95,7 +103,8 @@ io.on("connection", (socket) => {
                 break
             case "app":
                 console.log("App connected!")
-                status.app = socket.id
+                clients.app = socket
+                status.app = 2
                 break
             default:
                 console.log("Can't verify identity")
@@ -149,7 +158,7 @@ io.on("connection", (socket) => {
         })
         io.emit("app-stop")
         if(simulationStart !== 0) {
-            console.log("App Stopped. Start Export Procedure.")
+            console.log("EXPORT : App Stopped. Start Export Procedure.")
             // Export
             times = {
                 "immersion": simulationStart,
@@ -181,23 +190,23 @@ io.on("connection", (socket) => {
     })
 
     socket.on("app-bpm", (mode) => {
-        console.log("Dashboard > App : BPM Mode " + mode)
+        console.log("EVENT : Dashboard > App : BPM Mode " + mode)
         io.emit("app-bpm", mode)
     })
 
     socket.on("app-event", (id) => {
-        console.log("Dashboard > App : Event ID " + id)
+        console.log("EVENT : Dashboard > App : Event ID " + id)
         io.emit("app-event", id)
     })
 
     socket.on("app-diving", () => {
         simulationDiving = new Date()
-        console.log("Dashboard > App : Diving")
+        console.log("EVENT : Dashboard > App : Diving")
         io.emit("app-diving")
     })
 
     socket.on("dashboard-new-doctor", (data) => {
-        console.log("Dashboard : New Doctor")
+        console.log("USERS : Dashboard : New Doctor")
         fs.readFile(doctorsPath, 'utf8', function readFileCallback(err, doctors) {
             if (err) {
                 console.log(err);
@@ -215,7 +224,7 @@ io.on("connection", (socket) => {
         
     })
     socket.on("dashboard-new-patient", (data) => {
-        console.log("Dashboard : New Patient")
+        console.log("USERS : Dashboard : New Patient")
         fs.readFile(patientsPath, 'utf8', function readFileCallback(err, patients) {
             if (err) {
                 console.log(err);
@@ -231,7 +240,8 @@ io.on("connection", (socket) => {
         });
     })
     socket.on("dashboard-update-users", (data) => {
-        console.log("Dashboard : Update Current Users")
+        console.log("USERS : Dashboard : Update Current Users")
+        usersChanged = true
         users = data
     })
 
@@ -281,9 +291,43 @@ io.on("connection", (socket) => {
     })
 
     socket.on("disconnect", () => {
-        // Search for the origin: can emit ping and see the response - if someone doesnt answer, that's the one who has disconnected
-        console.log("Someone disconnected");
-        // clearInterval(interval);
+
+        console.log("DISCONNECTION : Someone disconnected");
+
+        if (socket === clients.app) {
+
+            clients.app = 0
+            status.app = 1
+            /* io.emit("app-sync") */
+            console.log("App desync. It may be normal : please wait for reconnexion (3 seconds)")
+
+            setTimeout(() => {
+                if(clients.app === 0) {
+                    /* io.emit("app-disconnected") */
+                    console.log("App disconnected. Please restart the app.")
+                }
+            }, 3000)
+
+        } else if(socket === clients.dashboard)  {
+
+            clients.dashboard = 0
+            status.dashboard = 1
+            /* io.emit("dashboard-sync") */
+            console.log("Dashboard desync. It may be normal : please wait for reconnexion (3 seconds)")
+
+            setTimeout(() => {
+                if(clients.dashboard === 0) {
+                    /* io.emit("dashboard-disconnected") */
+                    console.log("Dashboard disconnected. Please restart the dashboard.")
+                }
+            }, 3000)
+
+        } else {
+
+            console.log("Unknown disconnection. Clients socket info : " + clients)
+
+        }
+
     });
 });
 
@@ -291,6 +335,9 @@ const getApiAndEmit = socket => {
     const data = {
         deltaTime: 0,
         status: status,
+        usersChanged: usersChanged,
+        doctor: users.doctor,
+        patient: users.patient,
         data: {
             bpm: lastBpmData,
             breath: lastBreathData 

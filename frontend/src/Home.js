@@ -78,6 +78,14 @@ class Home extends React.Component {
         this.store.dispatch({ type: "doctor/set", payload: this.users.doctors[0] })
         this.store.dispatch({ type: "patient/set", payload: this.users.patients[0] })
       });
+
+    this.state.socket.on("ping", data => {
+      if(data.usersChanged) {
+        this.store.dispatch({ type: "doctor/set", payload: data.doctor })
+        this.store.dispatch({ type: "patient/set", payload: data.patient })
+      }
+      this.state.socket.removeAllListeners("ping")
+    })
   }
 
   componentWillUnmount() {

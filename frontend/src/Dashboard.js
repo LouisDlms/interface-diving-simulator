@@ -50,6 +50,8 @@ class Dashboard extends React.Component {
                     this.store.dispatch({ type: 'status/breath/ok' })
                     this.store.dispatch({ type: 'breath/update', payload: data.data.breath })
                 }
+                this.store.dispatch({ type: "doctor/set", payload: data.doctor })
+                this.store.dispatch({ type: "patient/set", payload: data.patient })
             }
         });
 
@@ -60,6 +62,22 @@ class Dashboard extends React.Component {
                 this.store.dispatch({ type: 'phase/set', payload: 1 })
             }
         })
+
+        /* this.state.socket.on("app-sync", () => {
+            this.store.dispatch({ type: 'status/app/sync' })
+        })
+
+        this.state.socket.on("app-disconnected", () => {
+            this.store.dispatch({ type: 'status/app/error' })
+        })
+
+        this.state.socket.on("dashboard-sync", () => {
+            this.store.dispatch({ type: 'status/app/sync' })
+        })
+
+        this.state.socket.on("dashboard-disconnected", () => {
+            this.store.dispatch({ type: 'status/app/error' })
+        }) */
     }
 
     componentWillUnmount() {
@@ -279,13 +297,13 @@ class Dashboard extends React.Component {
                         <div>
                             <GiDoctorFace className="user-icon"/>&nbsp;
                             <span className="align-middle ml-1 fs-5">
-                                { this.state.doctor.firstName + " " + this.state.doctor.lastName.toUpperCase() }
+                                { this.state.status.server !== 2 ? "[Chargement...]" : (this.state.doctor.firstName + " " + this.state.doctor.lastName.toUpperCase()) }
                             </span>
                         </div>
                         <div>
                             <BsPersonLinesFill className="user-icon"/>&nbsp;
                             <span className="align-middle ml-1 fs-5">
-                                { this.state.patient.firstName + " " + this.state.patient.lastName.toUpperCase() }
+                                { this.state.status.server !== 2 ? "[Chargement...]" : (this.state.patient.firstName + " " + this.state.patient.lastName.toUpperCase()) }
                             </span>
                         </div>    
                     </Col>
