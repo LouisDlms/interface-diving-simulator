@@ -9,7 +9,10 @@ class MedicalReport extends React.Component {
         
         this.store = props.store
         this.state = {
-            commentary: ""
+            medicalReport: {
+                commentary: ""
+            },
+            socket: this.store.getState().socket
         }
         this.unsubscribe = () => {}
     }
@@ -17,7 +20,7 @@ class MedicalReport extends React.Component {
     updateField = (field, e) => {
         switch(field) {
             case "commentary":
-                this.state.commentary = e.target.value
+                this.state.medicalReport.commentary = e.target.value
                 break
             default:
                 break
@@ -25,7 +28,7 @@ class MedicalReport extends React.Component {
     }
 
     save = (e) => {
-        this.store.socket.emit("dashboard-medical-report", this.state)
+        this.state.socket.emit("dashboard-medical-report", this.state.medicalReport)
     }
 
     render() {
