@@ -3,11 +3,11 @@
 let timesContainer = document.getElementById("times-container")
 
 let startTime = document.createElement("p")
-startTime.innerHTML = "<b>Début de la simulation :</b> " + times.start
+startTime.innerHTML = "<b>Début de la simulation :</b> " + times.immersion
 timesContainer.appendChild(startTime)
 
 let immersionTime = document.createElement("p")
-immersionTime.innerHTML = "<b>Plongée :</b> " + times.immersion
+immersionTime.innerHTML = "<b>Plongée :</b> " + times.diving
 timesContainer.appendChild(immersionTime)
 
 let endTime = document.createElement("p")
@@ -41,14 +41,19 @@ function changeVideoPosition(time) {
 
 anychart.onDocumentReady(function () {
     // create data set on our data
-    var bpmDataSet = anychart.data.set(bpmData);
-    var breathDataSet = anychart.data.set(bpmData); // todo: change into breathData
+    if(bpmData.length) {
+      var bpmDataSet = anychart.data.set(bpmData);
+      
+      // map data for the first series, take x from the zero column and value from the first column of data set
+      var bpmSeriesData = bpmDataSet.mapAs({ x: 'x', value: 'y' });
+    }
 
-    // map data for the first series, take x from the zero column and value from the first column of data set
-    var bpmSeriesData = bpmDataSet.mapAs({ x: 'x', value: 'y' });
+    if(breathData.length) {
+      var breathDataSet = anychart.data.set(breathData); // todo: change into breathData
 
-    // map data for the second series, take x from the zero column and value from the second column of data set
-    var breathSeriesData = breathDataSet.mapAs({ x: 'x', value: 'y' });
+      // map data for the second series, take x from the zero column and value from the second column of data set
+      var breathSeriesData = breathDataSet.mapAs({ x: 'x', value: 'y' });
+    }
 
     // create line chart
     var chart = anychart.line();
@@ -79,23 +84,25 @@ anychart.onDocumentReady(function () {
     var yCrossLabel = crosshair.yLabel();
     yCrossLabel.enabled(false);
 
-    // vertical marker on times
-    var lineMarker = chart.lineMarker();
-    lineMarker.value(bpmData[50].x); // TODO: change with corresponding times
-    lineMarker.layout("vertical");
-    lineMarker.scale(chart.xScale());
+    let dataRef = bpmData.length ? bpmData : breathData
 
-    var text = chart.textMarker(0);
-    text.value(bpmData[50].x); // TODO: change with corresponding times
-    text.axis(chart.xAxis());
-    text.text("Plongée");
-    text.align("top");
-    text.anchor("left-top");
-    text.offsetX(3);
-    text.rotation(0);
+    // vertical marker on times
+    // var lineMarker = chart.lineMarker();
+    // lineMarker.value(dataRef[50].x); // TODO: change with corresponding times
+    // lineMarker.layout("vertical");
+    // lineMarker.scale(chart.xScale());
+
+    // var text = chart.textMarker(0);
+    // text.value(dataRef[50].x); // TODO: change with corresponding times
+    // text.axis(chart.xAxis());
+    // text.text("Plongée");
+    // text.align("top");
+    // text.anchor("left-top");
+    // text.offsetX(3);
+    // text.rotation(0);
 
     chart.tooltip().title(false).separator(false).format(function() {
-      return "BPM: " + this.value;
+      return "Valeur: " + this.value;
     });
 
     // turn on chart animation
@@ -118,33 +125,38 @@ anychart.onDocumentReady(function () {
     chart.xAxis().labels().padding(5);
 
     // create first series with mapped data
-    var bpmSeries = chart.line(bpmSeriesData);
-    bpmSeries.name('BPM');
-    bpmSeries.hovered().markers().enabled(true).type('circle').size(4);
-    bpmSeries
-      .tooltip()
-      .position('right')
-      .anchor('left-center')
-      .offsetX(5)
-      .offsetY(5);
-
+    if(bpmData.length) {
+      var bpmSeries = chart.line(bpmSeriesData);
+      bpmSeries.name('BPM');
+      bpmSeries.hovered().markers().enabled(true).type('circle').size(4);
+      bpmSeries
+        .tooltip()
+        .position('right')
+        .anchor('left-center')
+        .offsetX(5)
+        .offsetY(5);
+    }
+    
     // create second series with mapped data
-    var breathSeries = chart.line(breathSeriesData);
-    breathSeries.name('Breath');
-    breathSeries.hovered().markers().enabled(true).type('circle').size(4);
-    breathSeries
-      .tooltip()
-      .position('right')
-      .anchor('left-center')
-      .offsetX(5)
-      .offsetY(5);
+    if(breathData.length) {
+      var breathSeries = chart.line(breathSeriesData);
+      breathSeries.name('Breath');
+      breathSeries.hovered().markers().enabled(true).type('circle').size(4);
+      breathSeries
+        .tooltip()
+        .position('right')
+        .anchor('left-center')
+        .offsetX(5)
+        .offsetY(5);
+    }
+    
 
     // turn the legend on
     chart.legend().enabled(true).fontSize(13).padding([0, 0, 10, 0]);
 
     // ONCLICK EVENT
     chart.listen("pointClick", function(e) {
-      changeVideoPosition(bpmData[e.pointIndex].x)
+      changeVideoPosition(dataRef[e.pointIndex].x)
     });
 
     // CONNECT TO VIDEO

@@ -127,21 +127,44 @@ let clients = {
 
 let fillTemplateEnded = false
 
-function fillTemplate(path) {
-    console.log("Filling")
-    const template = fs.readFileSync(path + "/index.html", 'utf8')
+function fillTemplate(pathData, newPathData) {
+    console.log("Filling template")
 
-    for (let j = 0; j < template.length; j++) {
-        if (template.substr(j, 2) === "{{") {
-            for(let i = 0; i < template.length - j; i++) {
-                if (template.substr(j + i, 2) === "}}") {
-                    toReplace = template.substr(j + 2, i - 2)
-                    console.log(toReplace)
-                    break
-                }
-            }
-        }
+    const finalPath = dataPath + "/" + pathData
+    let template = fs.readFileSync(finalPath + "/index.html", 'utf8')
+
+    template = template.split("{{name}}").join(newPathData)
+
+    let times = 0
+    try {
+        times = fs.readFileSync(finalPath + "/times.json", 'utf8')
+    } catch (err) {
+        console.log("No Times found.")
     }
+    template = template.replace("{{times}}", times ? times : "{}")
+
+    let bpmData = 0
+    try {
+        bpmData = fs.readFileSync(finalPath + "/bpm.json", 'utf8')
+    } catch(err) {
+        console.log("No BPM Data found.")
+    } 
+    template = template.replace("{{bpmData}}", bpmData ? bpmData : "[]")
+
+    let breathData = 0
+    try {
+        breathData = fs.readFileSync(finalPath + "/breath.json", 'utf8')
+    } catch(err) {
+        console.log("No Breath Data found.")
+    } 
+    template = template.replace("{{breathData}}", breathData ? breathData : "[]")
+
+    template = template.replace("{{srcVideo}}", "video-0.mp4") // TODO: if multiple videos ?
+
+    fs.writeFileSync(finalPath + "/index.html", template, 'utf8', err => {
+        if (err) throw err;
+        console.log('Template has been completed!');
+    });
 
     fillTemplateEnded = true
 }
@@ -239,11 +262,13 @@ io.on("connection", (socket) => {
             }
             
             fs.readdir("./captures", (err, files) => {
+                let i = 0;
                 files.forEach(file => {
-                        fs.rename("./captures/" + file, dirPath + "/" + file, err => {
+                        fs.rename("./captures/" + file, dirPath + "/video-" + i + ".mp4", err => {
                             if (err) throw err;
                             console.log('Moving ' + file);  
                         });
+                        i++
                    }
                 )
             })
@@ -338,35 +363,39 @@ io.on("connection", (socket) => {
 
         const finalPath = dataPath + "/" + pathData
 
-        // Put export-template in data folder
-        copyFolderRecursiveSync("./export-template/static", finalPath)
-        copyFileSync("./export-template/index.html", finalPath)
+        try {
+            fs.readFileSync(finalPath + "/" + newPathData + ".zip", 'utf8')
+        } catch (err) {
+            // Put export-template in data folder
+            copyFolderRecursiveSync("./export-template/static", finalPath)
+            copyFileSync("./export-template/index.html", finalPath)
 
-        // Replace variables in template
-        fillTemplate(finalPath)
+            // Replace variables in template
+            fillTemplate(pathData, newPathData)
 
-        while(!fillTemplateEnded) {}
-        
-        let output = fs.createWriteStream(finalPath + "/" + newPathData + ".zip");
-        let archive = archiver('zip');
+            while(!fillTemplateEnded) {}
 
-        output.on('close', function () {
-            console.log(archive.pointer() + ' total bytes');
-            console.log('archiver has been finalized and the output file descriptor has closed.');
-        });
-        
-        archive.on('error', function(err){
-            throw err;
-        });
-        
-        archive.pipe(output);
-        
-        // append files from a sub-directory, putting its contents at the root of archive
-        archive.directory(finalPath, false); // false => newPathData to rename ?
-        
-        archive.finalize();
+            let output = fs.createWriteStream(finalPath + "/" + newPathData + ".zip");
+            let archive = archiver('zip');
 
-        app.get("/data/" + newPathData, (req, res) => {
+            output.on('close', function () {
+                console.log(archive.pointer() + ' total bytes');
+                console.log('archiver has been finalized and the output file descriptor has closed.');
+            });
+
+            archive.on('error', function(err){
+                throw err;
+            });
+
+            archive.pipe(output);
+
+            // append files from a sub-directory, putting its contents at the root of archive
+            archive.directory(finalPath, false); // false => newPathData to rename ?
+
+            archive.finalize();
+        }
+
+        app.get("/data/" + dataId, (req, res) => {
             res.download(finalPath + "/" + newPathData + ".zip")
         })
     })
