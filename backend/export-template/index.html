@@ -10,19 +10,26 @@
         <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
         <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
 
-        <title>{{date}} - Plongée Virtuelle</title>
+        <title>{{name}} - Plongée Virtuelle</title>
     </head>
 
-    <body>
-        <script>
-            times = {{times}};
-            bpmData = {{bpmData}};
-            breathData = {{breathData}};
-        </script>
-        <div id="chart-container"></div>
+    <script>
+        times = {{times}}
+        
+        bpmData = {{bpmData}}
 
+        breathData = {{breathData}}
+    </script>
+
+    <body>
+        <h1>Rapport de l'étude {{name}}</h1>
+        <h2>Plongée virtuelle - CRC MINES</h2>
+
+        <div id="times-container"></div>
+        <div id="medical-report-container"></div>
+        <div id="chart-container"></div>
         <video controls id="video">
-            <source src={{src-video}}
+            <source src="{{srcVideo}}"
                     type="video/mp4">
         
             Sorry, your browser doesn't support embedded videos.

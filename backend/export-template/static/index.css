@@ -1,3 +1,48 @@
+html {
+    background-color: aliceblue;
+}
+
+body {
+    margin: 20px;
+    background-color: rgb(177, 209, 236);
+    border-radius: 20px;
+    box-shadow: 0 0 3px 2px rgb(177, 209, 236);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+h1 {
+    margin: 20px 20px 0 20px;
+    color: rgb(62, 62, 175);
+}
+
+h2 {
+    margin: 10px 20px;
+    font-weight: normal;
+    color: rgb(62, 62, 175);
+}
+
+#times-container {
+    text-align: left;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 20px;
+    background-color: rgba(240, 248, 255, 0.4);
+    font-size: 18px;
+}
+
+#times-container > * {
+    margin: 10px 0;
+}
+
 #chart-container {
     height: 400px;
+    margin: 20px;
+    z-index: 10;
+}
+
+#video {
+    margin: 20px;
 }

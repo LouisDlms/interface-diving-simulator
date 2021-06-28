@@ -1,7 +1,39 @@
+// TIMES
+
+let timesContainer = document.getElementById("times-container")
+
+let startTime = document.createElement("p")
+startTime.innerHTML = "<b>Début de la simulation :</b> " + times.start
+timesContainer.appendChild(startTime)
+
+let immersionTime = document.createElement("p")
+immersionTime.innerHTML = "<b>Plongée :</b> " + times.immersion
+timesContainer.appendChild(immersionTime)
+
+let endTime = document.createElement("p")
+endTime.innerHTML = "<b>Fin de la simulation :</b> " + times.end
+timesContainer.appendChild(endTime)
+
+
+if( times.events.length ) {
+  let eventsTime = document.createElement("p")
+  eventsTime.innerHTML = "<b>Evenements :</b>"
+  timesContainer.appendChild(eventsTime)
+
+  let eventsContainer = document.createElement("ul")
+  times.events.map(e => {
+    let eventContainer = document.createElement("li")
+    eventContainer.innerHTML = "<b>" + e.type.toUpperCase() + "</b> : " + e.date
+    eventsContainer.appendChild(eventContainer)
+  })
+  timesContainer.appendChild(eventsContainer)
+}
+
+// CHARTS + VIDEO
+
 let video = document.getElementById("video")
 
 function changeVideoPosition(time) {
-  console.log(parseInt("" + time / 1000))
   video.currentTime = parseInt("" + time / 1000)
 }
 
@@ -135,3 +167,18 @@ anychart.onDocumentReady(function () {
     chart.draw();
 }); 
 
+// BOTTOM : Layering
+
+let chartContainer = document.getElementById("chart-container");
+
+window.addEventListener("scroll", e => {
+  if((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+    chartContainer.style.position = "relative"
+    chartContainer.style.opacity = 0.7
+    computedBottom = video.offsetHeight + 40
+    chartContainer.style.bottom = "-" + computedBottom + "px"
+  } else {
+    chartContainer.style.position = "static"
+    chartContainer.style.opacity = 1
+  }
+})

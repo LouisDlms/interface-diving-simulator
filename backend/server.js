@@ -6,6 +6,7 @@ const socketIo = require("socket.io");
 const SerialPort = require("serialport");
 const Readline = require('@serialport/parser-readline');
 const fs = require('fs');
+const path = require("path")
 const exec = require('child_process').exec;
 const archiver = require('archiver');
 
@@ -34,9 +35,48 @@ app.use(function (req, res, next) {
     // Pass to next layer of middleware
     next();
 });
+
 app.use(index);
+
 const server = http.createServer(app);
 const io = socketIo(server); // < Interesting!
+
+function copyFileSync( source, target ) {
+
+    var targetFile = target;
+
+    // If target is a directory, a new file with the same name will be created
+    if ( fs.existsSync( target ) ) {
+        if ( fs.lstatSync( target ).isDirectory() ) {
+            targetFile = path.join( target, path.basename( source ) );
+        }
+    }
+
+    fs.writeFileSync(targetFile, fs.readFileSync(source));
+}
+
+function copyFolderRecursiveSync( source, target ) {
+    var files = [];
+
+    // Check if folder needs to be created or integrated
+    var targetFolder = path.join( target, path.basename( source ) );
+    if ( !fs.existsSync( targetFolder ) ) {
+        fs.mkdirSync( targetFolder );
+    }
+
+    // Copy
+    if ( fs.lstatSync( source ).isDirectory() ) {
+        files = fs.readdirSync( source );
+        files.forEach( function ( file ) {
+            var curSource = path.join( source, file );
+            if ( fs.lstatSync( curSource ).isDirectory() ) {
+                copyFolderRecursiveSync( curSource, targetFolder );
+            } else {
+                copyFileSync( curSource, targetFolder );
+            }
+        } );
+    }
+}
 
 let interval;
 let status = {
@@ -81,9 +121,30 @@ fs.readFile(configPath, 'utf8', (err, data) => {
 })
 
 let clients = {
-    app: 0,
+    app: 1,
     dashboard: 0
 };
+
+let fillTemplateEnded = false
+
+function fillTemplate(path) {
+    console.log("Filling")
+    const template = fs.readFileSync(path + "/index.html", 'utf8')
+
+    for (let j = 0; j < template.length; j++) {
+        if (template.substr(j, 2) === "{{") {
+            for(let i = 0; i < template.length - j; i++) {
+                if (template.substr(j + i, 2) === "}}") {
+                    toReplace = template.substr(j + 2, i - 2)
+                    console.log(toReplace)
+                    break
+                }
+            }
+        }
+    }
+
+    fillTemplateEnded = true
+}
 
 io.on("connection", (socket) => {
     console.log("CONNECTION : Someone connected, waiting for identification")
@@ -271,11 +332,21 @@ io.on("connection", (socket) => {
 
             if(dataId === id) {
                 pathData = dat
-                newPathData = id
+                newPathData = id + "_" + content[1]
             }
         })
 
         const finalPath = dataPath + "/" + pathData
+
+        // Put export-template in data folder
+        copyFolderRecursiveSync("./export-template/static", finalPath)
+        copyFileSync("./export-template/index.html", finalPath)
+
+        // Replace variables in template
+        fillTemplate(finalPath)
+
+        while(!fillTemplateEnded) {}
+        
         let output = fs.createWriteStream(finalPath + "/" + newPathData + ".zip");
         let archive = archiver('zip');
 
