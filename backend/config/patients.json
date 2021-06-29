@@ -1,8 +1,8 @@
 [
   {
     "id": 0,
-    "firstName": "François",
-    "lastName": "Mazé",
+    "firstName": "Sébastien",
+    "lastName": "Travadel",
     "birthDay": "2000-01-01",
     "sex": "M",
     "weight": 120,
@@ -16,23 +16,5 @@
     "weight": 20,
     "height": 150,
     "id": 1
-  },
-  {
-    "firstName": "Hugues",
-    "lastName": "Loupe",
-    "birthDay": "1976-12-15",
-    "sex": "M",
-    "weight": 78,
-    "height": 189,
-    "id": 2
-  },
-  {
-    "firstName": "Alexandre",
-    "lastName": "Grenier",
-    "birthDay": "2001-06-15",
-    "sex": "M",
-    "weight": 72,
-    "height": 173,
-    "id": 3
   }
 ]

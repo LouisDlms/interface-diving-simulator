@@ -288,7 +288,7 @@ io.on("connection", (socket) => {
     socket.on("app-diving", () => {
         simulationDiving = new Date()
         console.log("EVENT : Dashboard > App : Diving")
-        io.emit("app-diving")
+        // io.emit("app-diving")
     })
 
     socket.on("dashboard-new-doctor", (data) => {
@@ -471,7 +471,7 @@ spBpm.on("open", function() {
     console.log('COM4 opened (first USB port on the front of the computer)');
     status.bpmSensor = 1;
     parserBpm.on('data', function(data) {
-        console.log('Data received from COM4: ' + data);
+        // console.log('Data received from COM4: ' + data);
         if(simulationStart !== 0) {
             const serverClock = (new Date()) - simulationStart;
             counterBpm += 1
@@ -513,7 +513,7 @@ spBreath.on("open", function() {
     status.breathSensor = 1;
 
     parserBreath.on('data', function(data) {
-        console.log('Data received from COM5: ' + data);
+        // console.log('Data received from COM5: ' + data);
         if(simulationStart !== 0) {
             const serverClock = (new Date()) - simulationStart;
             counterBreath += 1

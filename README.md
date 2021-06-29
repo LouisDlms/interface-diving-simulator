@@ -1,9 +1,11 @@
-# Dashboard - Plongée Virtuelle
+# Interface (IO server + dashboard) - Diving Simulator
 
-## Backend: Apache (PHP) - MySQL
+Special thanks to MINES - PSL and its research laboratory CRC for having proposed us to realize this project for the benefit of the Hospitals of Nice.
 
-! Il faut nécessairement démarrer httpd.exe à la main pour pouvoir ouvrir et fermer des applications GUI sous Windows à l'aide de scripts PHP. Une solution pour automatiser cela consiste à placer un raccourci de httpd.exe dans le dossier shell:startup de Windows pour qu'il s'exécute comme un programme externe et non comme un service dès le démarrage.
+This interface is entirely realized in Javascript, from the frontend to the backend. It is made to work with the Diving Simulator developed on Unity by Marguerite DEJEAN DE LA BATIE, Anatole HERNOT (@ahernot), François MAZE (@francoismaze) and me. Please give a look on the following repository : <https://github.com/ahernot/diving-simulator>
 
-## Frontend : React JS
+## Backend: NodeJS - Express - SocketIO (master)
 
-Dont les packages react-bootstrap pour la mise en forme et react-vis pour les diagrammes
+## Frontend : ReactJS - Bootstrap
+
+Louis DELMAS / @delmaass
